@@ -2,24 +2,43 @@ package compliance_framework.template.azure._deny_single_az
 
 # METADATA
 # title: Ensure RDS instances are deployed across multiple availability zones
-# description: Verifies that RDS instances are configured for high availability by being deployed across multiple availability zones.
+# description: Verifies that RDS instances are deployed in more than one availability zone to ensure high availability and resiliency.
 # custom:
 #   controls:
 #     - SAMA_CSF_1.0
+#     - SAMA_ITGF_1.0
+#     - SAMA_RMG_1.0
 #   schedule: "* * * * * *"
 
 controls := [
     # SAMA Cyber Security Framework v1.0
-    # https://www.sama.gov.sa/en-US/RulesInstructions/CyberSecurity/Cyber%20Security%20Framework.pdf
+    # https://rulebook.sama.gov.sa/en/cyber-security-framework-2
     # Class: SAMA_CSF_1.0
-    #
-    # 3.3.10: Data Backup and Recoverability
     {
         "class": "SAMA_CSF_1.0",
-        "control-id": "3.3.10", # Data Backup and Recoverability
+        "control-id": "5.2.1", # High Availability
         "statement-ids": [
-            "1", # Define, approve, and implement a data backup management strategy.
-            "2", # Ensure backup policies include considerations for backup frequency, storage, and security.
+            "2", # Ensure high availability is maintained across critical systems.
+        ],
+    },
+    # SAMA IT Governance Framework v1.0
+    # https://rulebook.sama.gov.sa/en/it-governance-framework
+    # Class: SAMA_ITGF_1.0
+    {
+        "class": "SAMA_ITGF_1.0",
+        "control-id": "3.2.1", # IT Availability Management
+        "statement-ids": [
+            "1", # Ensure critical systems are deployed across multiple availability zones.
+        ],
+    },
+    # SAMA Risk Management Guidelines v1.0
+    # https://www.sama.gov.sa/en/RulesInstructions/RiskManagement
+    # Class: SAMA_RMG_1.0
+    {
+        "class": "SAMA_RMG_1.0",
+        "control-id": "2.1.1", # Resilience and Redundancy
+        "statement-ids": [
+            "1", # Ensure systems are designed for resilience.
         ],
     },
 ]
