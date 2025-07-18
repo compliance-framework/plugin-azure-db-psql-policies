@@ -1,7 +1,12 @@
-package compliance_framework.template.azure._deny_public_subnet
+package compliance_framework.deny_public_subnet
 
-violation[{
-  "title": "RDS instance is deployed in a public subnet",
-}] if {
+violation[{}] if {
   input.Properties.network.publicNetworkAccess == "Enabled"
+}
+
+title := "Azure PostgreSQL Public Subnet Access Denied"
+description := "Azure PostgreSQL should not allow public subnet access."
+labels := {
+  "severity": "high",
+  "category": "access_control",
 }
