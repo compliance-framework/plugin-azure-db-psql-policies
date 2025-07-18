@@ -1,62 +1,80 @@
-# Template for policies for use in Compliance Framework plugins
+# Azure Database for PostgreSQL Compliance Policies
 
-## Testing
+This repository contains OPA/Rego policies for enforcing compliance controls on Azure Database for PostgreSQL and AWS RDS Aurora PostgreSQL resources. These policies are designed for use in Compliance Framework plugins and can be bundled, tested, and evaluated locally.
 
+## Structure
+
+- All policies are located in the `policies/` directory.
+- Each policy file is paired with a corresponding test file (e.g., `azure_psql_backup_retention.rego` and `azure_psql_backup_retention_test.rego`).
+
+## Testing Policies
+
+Run all policy tests using:
 
 ```shell
 opa test policies
 ```
 
-## Bundling
+## Building Policy Bundles
 
-Policies are built into bundle to make distribution easier. 
+To bundle all policies for distribution, run:
 
-You can easily build the policies by running 
 ```shell
 make build
 ```
 
-## Running policies locally
+## Evaluating Policies Locally
+
+You can evaluate policies against sample input using OPA. For example:
 
 ```shell
-opa eval -I -b policies -f pretty data.compliance_framework.local_ssh <<EOF 
-{
-  "passwordauthentication": [
-    "yes"
-  ],
-  "permitrootlogin": [
-    "with-password"
-  ],
-  "pubkeyauthentication": [
-    "no"
-  ]
-}
-EOF
+opa eval -I -b policies -f pretty "data.compliance_framework.deny_no_automatic_backup" -i input.json
 ```
 
-## Writing policies.
+Replace `input.json` with your test input file. Adjust the data path to match the policy you want to evaluate (see the package name in each `.rego` file).
 
-Policies are written in the [Rego](https://www.openpolicyagent.org/docs/latest/policy-language/) language.
+## Writing Policies
+
+Policies are written in the [Rego](https://www.openpolicyagent.org/docs/latest/policy-language/) language. Each policy should:
+
+- Use a descriptive package name (e.g., `azure_psql_backup_retention`).
+- Define a `violation` rule that returns a list of objects describing compliance issues.
+- Include a metadata section as described below.
+
+Example:
 
 ```rego
-package ssh.deny_password_auth
+package compliance_framework.azure_psql_backup_retention
 
-import future.keywords.in
-
-violation[{
-    "title": "Host SSH is using password authentication.",
-    "description": "Host SSH should not use password, as this is insecure to brute force attacks from external sources.",
-    "remarks": "Migrate to using SSH Public Keys, and switch off password authentication."
-}] {
-	"yes" in input.passwordauthentication
+violation[{}] if {
+    input.backup_retention_days < 7
 }
+
+title := "Backup retention is lower than 7 days"
 ```
 
 ## Metadata
 
-Plugins expect policies to contain a metadata section as comments, with a `# METADATA` line to indicate it. This metadata should be in a YAML format, and contain a title and description of the policy. Other configuration can be set also, like the schedule that a policy should run on, or the control that it is linked to.
+Each policy must include a metadata section as comments, starting with `# METADATA`. The metadata should be in YAML format and include at least a title and description. You may also specify controls, schedule, or other custom fields.
 
-Any other comments can be added as normal (before and after) with a line separator between them and the metadata.
+Example:
+
+```rego
+# METADATA
+# title: Azure PostgreSQL Backup Retention
+# description: Ensures backup retention is at least 7 days for compliance.
+# custom:
+#   controls:
+#     - CF-PSQL-001
+#   schedule: "0 0 * * *"
+```
+
+Additional comments can be added before or after the metadata, separated by a blank line.
+
+## References
+
+- [Open Policy Agent Documentation](https://www.openpolicyagent.org/docs/latest/)
+- [Rego Policy Language](https://www.openpolicyagent.org/docs/latest/policy-language/)
 
 Here is an example metadata:
 ```opa
@@ -72,3 +90,9 @@ Here is an example metadata:
 
 # your custom comment
 ```
+
+---
+
+## License
+
+This repository is licensed under the terms of the GNU Affero General Public License v3.0. See the [LICENSE](LICENSE) file for details.
